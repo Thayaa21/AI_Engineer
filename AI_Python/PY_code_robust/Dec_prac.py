@@ -36,7 +36,7 @@ def requires_permission(permission_level: str):
                 return func(user_role, *args, **kwargs)
             else:
                 print(f"ACCESS DENIED: '{user_role}' can't enter '{func.__name__}'")
-                raise PermissionError(f"Insufficient permissions for '{user_role}'")
+                # raise PermissionError(f"Insufficient permissions for '{user_role}'")
         return wrapper
     return decorator
 
@@ -47,7 +47,7 @@ def deploy_model(user_role, model_id, environment):
 # Test it
 deploy_model("data_scientist", "fraud_v2", "production")  # ✅
 deploy_model("admin", "rec_engine", "staging")            # ✅ master key
-try:
-    deploy_model("junior_analyst", "model_x", "production")
-except PermissionError as e:
-    print(f"Caught: {e}")
+# try:
+deploy_model("junior_analyst", "model_x", "production")
+# except PermissionError as e:
+#     print(f"Caught: {e}")

@@ -136,6 +136,41 @@ The decorator **guards** the function — security is the bouncer's job, not the
 
 ---
 
+## Stacking Decorators
+
+**The Nightclub with a CCTV 🎥🎵**
+
+The worker (DJ) now has TWO managers:
+- **Bouncer** (`requires_permission`) — checks ID at the door
+- **CCTV** (`logger`) — records everything that happens, including the bouncer's decisions
+
+The CCTV is outside the bouncer — it sees everything first.
+So CCTV goes on **top**, bouncer goes **below**.
+
+> Read bottom to top — bottom decorator is closest to the worker, top decorator is the first thing the world hits.
+
+```python
+@logger                                  # CCTV — outside, sees everything first
+@requires_permission("data_scientist")   # Bouncer — checks ID before worker runs
+def deploy_model(user_role, model_id, environment):
+    print(f"'{user_role}' deploying '{model_id}' to '{environment}'")
+```
+
+Python reads this as:
+```
+logger( requires_permission( deploy_model ) )
+```
+Jacket over t-shirt — bottom wraps first, top wraps over that.
+
+```python
+@logger                                  # CCTV — outside, sees everything first
+@requires_permission("data_scientist")   # Bouncer — checks ID before worker runs
+def deploy_model(user_role, model_id, environment):
+    ...
+```
+
+---
+
 ## Key Takeaways
 
 - A decorator **wraps** a function without modifying it
