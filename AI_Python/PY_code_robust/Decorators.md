@@ -171,7 +171,49 @@ def deploy_model(user_role, model_id, environment):
 
 ---
 
-## Key Takeaways
+## Class-Based Decorators
+
+**Function decorator = one manager**
+**Class decorator = whole management team** — each method has a different role, and the team **remembers everything** using `self`.
+
+A function manager forgets after each job. Class management team keeps records forever.
+
+### The Two Roles
+
+| Method | Role |
+|--------|------|
+| `__init__` | Front desk — registers the plumber OR receives the rulebook |
+| `__call__` | Activates every time plumber gets a job call |
+
+### No Brackets — Plumber registers at `__init__`
+
+```python
+@CCTVManager
+def deploy_model():
+    ...
+```
+- `__init__` = plumber walks in, management registers him, starts the counter
+- `__call__` = every job call, CCTV ticks the counter up
+
+### With Brackets — Rules first, plumber later
+
+```python
+@RateLimiter(calls_per_second=0.5)
+def query_ai_api():
+    ...
+```
+- `__init__` = management hired with rulebook ("1 job every 2 seconds")
+- `__call__` = plumber arrives, gets wrapped with the rules
+
+> **Simple rule — brackets = rules first, plumber later. No brackets = plumber first, job later.**
+
+### Why Class Over Function Decorator?
+
+RateLimiter needs to **remember** the last job time across every call — `self.last_call_time`. A function decorator can't do this, it forgets after each call. Class remembers because of `self`.
+
+---
+
+
 
 - A decorator **wraps** a function without modifying it
 - `@functools.wraps` preserves the original function's identity
