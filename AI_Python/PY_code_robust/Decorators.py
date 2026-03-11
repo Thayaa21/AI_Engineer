@@ -191,3 +191,62 @@ query_ai_api("Tell me a joke.")
 query_ai_api("Summarize this text.")
 end_time = time.monotonic()
 print(f"Total execution time: {end_time - start_time:.2f}s")
+
+
+import functools
+import hashlib
+import json
+import time
+
+# A simple in-memory cache for demonstration.
+# In production, this would likely be Redis or a similar key-value store.
+CACHE = {}
+
+def cache_predictions(func):
+    """
+    Decorator to cache the results of a function based on its arguments.
+    Useful for expensive AI model inference calls.
+    """
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        # Create a unique cache key from function name and arguments
+        # Simple hashing for demonstration; consider robust serialization for complex objects
+        key_parts = [func.__name__] + list(args) + sorted([(k, v) for k, v in kwargs.items()])
+        cache_key = hashlib.md5(json.dumps(key_parts, sort_keys=True).encode('utf-8')).hexdigest()
+
+        if cache_key in CACHE:
+            print(f"CACHE HIT for '{func.__name__}' with key '{cache_key[:8]}...'")
+            return CACHE[cache_key]
+        else:
+            print(f"CACHE MISS for '{func.__name__}' with key '{cache_key[:8]}...'. Computing...")
+            result = func(*args, **kwargs)
+            CACHE[cache_key] = result
+            return result
+    return wrapper
+
+@cache_predictions
+def get_sentiment_score(text: str, model_version: str = "v1"):
+    """
+    Simulates calling a sentiment analysis model. This is an expensive operation.
+    """
+    print(f"Analyzing sentiment for text: '{text[:20]}...' using model {model_version}")
+    time.sleep(1) # Simulate computation time
+    # Dummy logic for sentiment score
+    if "happy" in text.lower() or "good" in text.lower():
+        return {"text": text, "score": 0.9, "model": model_version}
+    elif "bad" in text.lower() or "sad" in text.lower():
+        return {"text": text, "score": 0.1, "model": model_version}
+    else:
+        return {"text": text, "score": 0.5, "model": model_version}
+
+print("--- Testing cache_predictions decorator ---")
+result1 = get_sentiment_score("This is a really good day!", model_version="v2")
+result2 = get_sentiment_score("This is a really good day!", model_version="v2") # Cache hit!
+result3 = get_sentiment_score("I am feeling very happy.", model_version="v1")
+result4 = get_sentiment_score("I am feeling very happy.", model_version="v1") # Cache hit!
+result5 = get_sentiment_score("The movie was bad.", model_version="v2")
+print(result1)
+print(result2)
+print(result3)
+print(result4)
+print(result5)
